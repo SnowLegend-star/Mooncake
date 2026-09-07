@@ -13,7 +13,8 @@ if(USE_CUDA)
   enable_language(CUDA)
   set(_pg_device_input
       "${_pg_device_source}"
-      "${CMAKE_CURRENT_SOURCE_DIR}/device_comm/device_collective/protocols/ring/ring_all_reduce.cu")
+      "${CMAKE_CURRENT_SOURCE_DIR}/device_comm/device_collective/protocols/ring/ring_all_reduce.cu"
+  )
 elseif(USE_MUSA OR USE_MACA)
   set(_pg_device_object "${CMAKE_CURRENT_BINARY_DIR}/mooncake_worker_device.o")
   set(_pg_device_depfile "${CMAKE_CURRENT_BINARY_DIR}/mooncake_worker_device.d")
@@ -77,7 +78,7 @@ elseif(USE_MUSA OR USE_MACA)
                   "${_pg_platform_name} compiler (${_pg_device_compiler_name})")
   endif()
   list(APPEND _pg_device_flags "-DUSE_${_pg_platform_name}"
-       ${_pg_platform_device_flags})
+       "-DMOONCAKE_EP_USE_${_pg_platform_name}=1" ${_pg_platform_device_flags})
 
   add_custom_command(
     OUTPUT "${_pg_device_object}"

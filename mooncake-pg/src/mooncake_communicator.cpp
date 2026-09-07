@@ -606,6 +606,10 @@ PGResult<void> MooncakeCommunicator::initialize(
     meta_->engine = context_.engine;
     meta_->communicator = this;
     meta_->autoSyncOnFailure = config.auto_sync_on_failure;
+    if (active_ranks_mirror_ && active_ranks_mirror_is_device_ &&
+        active_ranks_mirror_device_index_ == device_index_) {
+        meta_->activeRanksMirrorDevice = active_ranks_mirror_;
+    }
     p2p_proxy_->bindMeta(meta_);
 
     // Active ranks will be filled by applyGroupState, so only allocate their
@@ -1536,6 +1540,10 @@ PGResult<void> MooncakeCommunicator::syncActiveRanksMirror() const {
     // storage.
     const size_t bytes = max_group_size_ * sizeof(int32_t);
     if (active_ranks_mirror_is_device_) {
+        if (meta_ && meta_->activeRanksMirrorDevice && worker_ &&
+            worker_->hasPendingActiveRanksMirrorUpdate(meta_.get())) {
+            return {};
+        }
         PG_VALIDATE_STATE(active_ranks_mirror_staging_ &&
                               active_ranks_mirror_stream_.has_value(),
                           "device active-ranks mirror staging is unavailable");
